@@ -47,9 +47,17 @@ jobs:
         working-directory: /tmp/offline_medical_assistant_android
         run: flutter test
 
+      - name: Configure minSdkVersion to 28
+        run: |
+          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 28/g' /tmp/offline_medical_assistant_android/android/app/build.gradle.kts || true
+          sed -i 's/minSdkVersion = flutter.minSdkVersion/minSdkVersion = 28/g' /tmp/offline_medical_assistant_android/android/app/build.gradle.kts || true
+          sed -i 's/minSdkVersion 24/minSdkVersion 28/g' /tmp/offline_medical_assistant_android/android/app/build.gradle.kts || true
+          sed -i 's/minSdk = 24/minSdk = 28/g' /tmp/offline_medical_assistant_android/android/app/build.gradle.kts || true
+
+
       - name: Build release APK
         working-directory: /tmp/offline_medical_assistant_android
-        run: flutter build apk --release --dart-define=flutter.minSdkVersion=28
+        run: flutter build apk --release
 
 
 

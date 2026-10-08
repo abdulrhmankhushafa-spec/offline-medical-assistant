@@ -26,7 +26,7 @@ void main() {
 
   test('emergency detection', () {
     expect(
-      const MedicalSafetyService().check('لدي نزيف شديد').emergency,
+      MedicalSafetyService().check('لدي نزيف شديد').emergency,
       isTrue,
     );
   });

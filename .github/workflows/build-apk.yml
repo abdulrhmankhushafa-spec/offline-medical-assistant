@@ -49,7 +49,8 @@ jobs:
 
       - name: Build release APK
         working-directory: /tmp/offline_medical_assistant_android
-        run: flutter build apk --release
+        run: flutter build apk --release --min-sdk=28
+
 
       - name: Collect APK
         run: |

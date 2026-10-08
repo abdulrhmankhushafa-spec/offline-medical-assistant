@@ -1,0 +1,63 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter 3.44.9 (Dart 3.12.x)
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.9'
+          channel: stable
+          cache: true
+
+      - name: Show toolchain
+        run: |
+          flutter --version
+          dart --version
+
+      - name: Create Android host project
+        run: |
+          flutter create --platforms=android --org com.example --project-name offline_medical_assistant /tmp/offline_medical_assistant_android
+          cp pubspec.yaml /tmp/offline_medical_assistant_android/pubspec.yaml
+          rm -rf /tmp/offline_medical_assistant_android/lib
+          rm -rf /tmp/offline_medical_assistant_android/test
+          cp -r lib /tmp/offline_medical_assistant_android/lib
+          cp -r test /tmp/offline_medical_assistant_android/test
+          mkdir -p /tmp/offline_medical_assistant_android/assets/models
+          if [ -d assets/models ]; then cp -r assets/models/. /tmp/offline_medical_assistant_android/assets/models/; fi
+
+      - name: Resolve dependencies
+        working-directory: /tmp/offline_medical_assistant_android
+        run: flutter pub get
+
+      - name: Analyze
+        working-directory: /tmp/offline_medical_assistant_android
+        run: flutter analyze --no-fatal-infos
+
+      - name: Test
+        working-directory: /tmp/offline_medical_assistant_android
+        run: flutter test
+
+      - name: Build release APK
+        working-directory: /tmp/offline_medical_assistant_android
+        run: flutter build apk --release
+
+      - name: Collect APK
+        run: |
+          mkdir -p artifacts
+          cp /tmp/offline_medical_assistant_android/build/app/outputs/flutter-apk/app-release.apk artifacts/OfflineMedicalAssistant.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: OfflineMedicalAssistant-APK
+          path: artifacts/OfflineMedicalAssistant.apk
